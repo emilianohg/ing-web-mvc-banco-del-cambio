@@ -35,10 +35,9 @@ public class BilletesRepository {
         return billetes;
     }
 
-    public List<Billete> agregarBilletes(List<Billete> billetes) {
+    public List<Billete> agregar(List<Billete> billetes) {
 
         try {
-            db.getConnection().setAutoCommit(false);
             Statement stmt = db.getConnection().createStatement();
 
             for (Billete billete : billetes) {
@@ -52,15 +51,33 @@ public class BilletesRepository {
 
             db.getConnection().commit();
             stmt.close();
-            db.getConnection().setAutoCommit(true);
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-            try {
-                db.getConnection().rollback();
-            } catch (SQLException se) {
-                se.printStackTrace();
+        }
+
+        return this.getAll();
+    }
+
+    public List<Billete> retirar(List<Billete> billetes) {
+
+        try {
+            Statement stmt = db.getConnection().createStatement();
+
+            for (Billete billete : billetes) {
+                String sqlReducirExistencia = String.format(
+                        "UPDATE Billetes SET existencia = existencia - %s WHERE denominacion = %s",
+                        billete.getExistencia(),
+                        billete.getDenominacion()
+                );
+                stmt.execute(sqlReducirExistencia);
             }
+
+            db.getConnection().commit();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
 
         return this.getAll();

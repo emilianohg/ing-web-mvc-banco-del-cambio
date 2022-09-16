@@ -38,42 +38,51 @@ public class DashboardModel {
             }
         }
 
-        return billetesRepository.agregarBilletes(billetesNuevos);
+        return billetesRepository.agregar(billetesNuevos);
     }
 
-    public List<Billete> retirar(int cantidad) {
+    public List<Billete> retirar(int cantidad) throws BilletesInsuficientesException {
+        Optional<List<Billete>> billetesRetirados = Database.transaction(() -> {
 
-        int cantidadActual = cantidad;
+            int cantidadActual = cantidad;
 
-        // Esto no va a funcionar bien porque estoy fuera de la transacción
-        List<Billete> billetesInventario = this.getAll();
-        List<Billete> billetesRetirados = new Vector<>();
+            List<Billete> billetesInventario = billetesRepository.getAll();
+            List<Billete> billetesPorRetirar = new Vector<>();
 
-        for (Billete billete : billetesInventario) {
-            int denominacion = billete.getDenominacion();
-            int existencia = billete.getExistencia();
-            int maximoPorDenominacion = cantidadActual / denominacion;
+            for (Billete billete : billetesInventario) {
+                int denominacion = billete.getDenominacion();
+                int existencia = billete.getExistencia();
+                int maximoPorDenominacion = cantidadActual / denominacion;
 
-            // Me quedo con la existencia o con el maximo que ocupo por denominación
-            // Selecciono el menor de los dos
-            int cantidadPorDenomiacion = Math.min(maximoPorDenominacion, existencia);
+                // Me quedo con la existencia o con el maximo que ocupo por denominación
+                // Selecciono el menor de los dos
+                int cantidadPorDenomiacion = Math.min(maximoPorDenominacion, existencia);
 
-            if (cantidadPorDenomiacion > 0) {
-                cantidadActual -= denominacion * cantidadPorDenomiacion;
-                billetesRetirados.add(new Billete(denominacion, cantidadPorDenomiacion));
+                if (cantidadPorDenomiacion > 0) {
+                    cantidadActual -= denominacion * cantidadPorDenomiacion;
+                    billetesPorRetirar.add(new Billete(denominacion, cantidadPorDenomiacion));
+                }
             }
+
+            Integer totalRetirado = billetesPorRetirar
+                    .stream()
+                    .map(_billete -> _billete.getDenominacion() * _billete.getExistencia())
+                    .reduce(0, Integer::sum);
+
+            if (totalRetirado != cantidad) {
+                return null;
+            }
+
+            billetesRepository.retirar(billetesPorRetirar);
+
+            return billetesPorRetirar;
+        });
+
+        if (!billetesRetirados.isPresent()) {
+            throw new BilletesInsuficientesException();
         }
 
-        Integer totalRetirado = billetesRetirados
-                .stream()
-                .map(_billete -> _billete.getDenominacion() * _billete.getExistencia())
-                .reduce(0, Integer::sum);
-
-        if (totalRetirado != cantidad) {
-            // throw new BilletesInsuficientesException();
-        }
-
-        return billetesRetirados;
+        return billetesRetirados.get();
     }
 
 }

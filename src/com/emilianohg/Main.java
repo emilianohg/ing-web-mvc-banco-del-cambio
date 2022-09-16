@@ -3,6 +3,7 @@ package com.emilianohg;
 import com.emilianohg.controllers.DashboardController;
 import com.emilianohg.models.DashboardModel;
 import com.emilianohg.views.DashboardView;
+import com.emilianohg.views.RetirarBilletesView;
 
 public class Main {
 
@@ -10,8 +11,10 @@ public class Main {
 
         DashboardModel dashboardModel = new DashboardModel();
 
-        DashboardController dashboardController = new DashboardController(dashboardModel);
+        RetirarBilletesView retirarBilletesView = new RetirarBilletesView();
 
-        DashboardView dashboardView = new DashboardView(dashboardController);
+        DashboardController dashboardController = new DashboardController(dashboardModel, retirarBilletesView);
+
+        retirarBilletesView.setVisible(true);
     }
 }

@@ -12,6 +12,11 @@ package com.emilianohg.models;
 import com.emilianohg.environment.Environment;
 
 import java.sql.*;
+import java.util.Optional;
+
+interface Callback<T> {
+    T call();
+}
 
 public class Database {
 
@@ -61,6 +66,33 @@ public class Database {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public static <T> Optional<T> transaction(Callback<T> callback) {
+        Database db = Database.getInstance();
+
+        T result = null;
+
+        try {
+            db.getConnection().setAutoCommit(false);
+
+            result = callback.call();
+
+            db.getConnection().setAutoCommit(true);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            try {
+                db.getConnection().rollback();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+
+        if (result == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(result);
     }
 
 }

@@ -7,11 +7,10 @@ import java.awt.*;
 
 public class DashboardView extends JFrame {
 
-    final private DashboardController controller;
+    private DashboardController controller;
 
-    public DashboardView(DashboardController controller) {
+    public DashboardView() {
         super("Banco del cambio");
-        this.controller = controller;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 500);
@@ -25,7 +24,7 @@ public class DashboardView extends JFrame {
         JTextField textCantidad = new JTextField();
         JButton btnCambiar = new JButton("Cambiar");
 
-        btnCambiar.addActionListener(actionEvent -> this.controller.retirar());
+        btnCambiar.addActionListener(actionEvent -> this.controller.retirar(1999));
 
         JPanel panelFormCambiar = new JPanel();
         GridLayout panelFormCambiarLayout = new GridLayout(0,3);
@@ -55,6 +54,7 @@ public class DashboardView extends JFrame {
 
         panelInventario.setLayout(new BoxLayout(panelInventario, BoxLayout.PAGE_AXIS));
 
+        /*
         String[][] data = controller.getBilletesFromInventario().stream().map(billete -> new String[] {
             String.valueOf(billete.getDenominacion()),
             String.valueOf(billete.getExistencia()),
@@ -66,6 +66,8 @@ public class DashboardView extends JFrame {
 
         panelInventario.add(new JScrollPane(table));
 
+         */
+
         panelDistribucion.add(panelFormCambiar, BorderLayout.CENTER);
         panelDistribucion.add(new JScrollPane(), BorderLayout.SOUTH);
 
@@ -74,6 +76,13 @@ public class DashboardView extends JFrame {
         add(panelInventario, BorderLayout.LINE_END);
         add(panelDistribucion, BorderLayout.CENTER);
 
-        setVisible(true);
+    }
+
+    public void showMessageError(String message) {
+        JOptionPane.showMessageDialog(null, message,"Ocurrio un error", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void setController(DashboardController controller) {
+        this.controller = controller;
     }
 }
