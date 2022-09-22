@@ -10,7 +10,14 @@ public class BilletesRepository {
     Database db = Database.getInstance();
 
     public List<Billete> getAll() {
-        String sql = "SELECT * FROM Billetes ORDER BY denominacion DESC";
+        return getAll(false);
+    }
+
+    public List<Billete> getAll(boolean updLock) {
+        String sql = String.format(
+        "SELECT * FROM Billetes %s ORDER BY denominacion DESC",
+            updLock ? "WITH (UPDLOCK)" : ""
+        );
 
         List<Billete> billetes = new Vector<>();
 
@@ -42,14 +49,14 @@ public class BilletesRepository {
 
             for (Billete billete : billetes) {
                 String sqlAgregarExistencia = String.format(
-                    "UPDATE Billetes SET existencia = existencia + %s WHERE denominacion = %s",
+                    "UPDATE Billetes SET existencia = existencia + %s, fecha = '%s' WHERE denominacion = %s",
                     billete.getExistencia(),
+                    billete.getFecha(),
                     billete.getDenominacion()
                 );
                 stmt.execute(sqlAgregarExistencia);
             }
 
-            db.getConnection().commit();
             stmt.close();
 
         } catch (SQLException throwables) {
@@ -66,14 +73,14 @@ public class BilletesRepository {
 
             for (Billete billete : billetes) {
                 String sqlReducirExistencia = String.format(
-                        "UPDATE Billetes SET existencia = existencia - %s WHERE denominacion = %s",
+                        "UPDATE Billetes SET existencia = existencia - %s, fecha = '%s' WHERE denominacion = %s",
                         billete.getExistencia(),
+                        billete.getFecha(),
                         billete.getDenominacion()
                 );
                 stmt.execute(sqlReducirExistencia);
             }
 
-            db.getConnection().commit();
             stmt.close();
 
         } catch (SQLException throwables) {
@@ -82,4 +89,5 @@ public class BilletesRepository {
 
         return this.getAll();
     }
+
 }

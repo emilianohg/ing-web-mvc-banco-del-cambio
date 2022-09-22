@@ -1,22 +1,9 @@
-/*
-    Materia: TEMAS SELECTOS DE BASE DE DATOS
-    Maestro: GARCIA GERARDO CLEMENTE
-    Equipo:
-        HERNÁNDEZ GUERRERO EMILIANO
-        AGUILAR PADILLA LUIS GERARDO
-        AMARILLAS PACHECO EFRAIN
- */
-
 package com.emilianohg.models;
 
 import com.emilianohg.environment.Environment;
 
 import java.sql.*;
 import java.util.Optional;
-
-interface Callback<T> {
-    T call();
-}
 
 public class Database {
 
@@ -29,6 +16,10 @@ public class Database {
     private final String DATABASE_NAME;
     private final String USER;
     private final String PASSWORD;
+
+    interface Callback<T> {
+        T call();
+    }
 
     private Database() {
         this.env = new Environment();
@@ -55,12 +46,12 @@ public class Database {
 
     private String getConnectionUrl() {
         return String.format(
-                "jdbc:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s;encrypt=true;trustServerCertificate=true;",
-                this.SERVER,
-                this.PORT,
-                this.DATABASE_NAME,
-                this.USER,
-                this.PASSWORD
+            "jdbc:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s;encrypt=true;trustServerCertificate=true;",
+            this.SERVER,
+            this.PORT,
+            this.DATABASE_NAME,
+            this.USER,
+            this.PASSWORD
         );
     }
 
@@ -79,7 +70,8 @@ public class Database {
             result = callback.call();
 
             db.getConnection().setAutoCommit(true);
-        } catch (SQLException throwables) {
+
+        } catch (Exception throwables) {
             throwables.printStackTrace();
             try {
                 db.getConnection().rollback();

@@ -19,23 +19,16 @@ public class DashboardModel {
 
         Random random = new Random();
 
-        int billetesPorAgregar = random.nextInt(10) + 10; // [10 - 20]
+        for (Billete billeteInventario : billetesInventario) {
 
-        for (int i = 0; i < billetesPorAgregar; i++) {
-            int posicionBillete = random.nextInt(billetesInventario.size());
+            int billetesPorAgregar = random.nextInt(10) + 10; // [10 - 20]
 
-            Billete billete = billetesInventario.get(posicionBillete);
-
-            Optional<Billete> billeteNuevo = billetesNuevos
-                .stream()
-                .filter(_billete -> billete.getDenominacion() == _billete.getDenominacion())
-                .findFirst();
-
-            if (billeteNuevo.isPresent()) {
-                billeteNuevo.get().agregarExistencia(1);
-            } else {
-                billetesNuevos.add(new Billete(billete.getDenominacion()));
-            }
+            billetesNuevos.add(
+                new Billete(
+                    billeteInventario.getDenominacion(),
+                    billetesPorAgregar
+                )
+            );
         }
 
         return billetesRepository.agregar(billetesNuevos);
@@ -46,7 +39,7 @@ public class DashboardModel {
 
             int cantidadActual = cantidad;
 
-            List<Billete> billetesInventario = billetesRepository.getAll();
+            List<Billete> billetesInventario = billetesRepository.getAll(true);
             List<Billete> billetesPorRetirar = new Vector<>();
 
             for (Billete billete : billetesInventario) {
@@ -54,8 +47,6 @@ public class DashboardModel {
                 int existencia = billete.getExistencia();
                 int maximoPorDenominacion = cantidadActual / denominacion;
 
-                // Me quedo con la existencia o con el maximo que ocupo por denominación
-                // Selecciono el menor de los dos
                 int cantidadPorDenomiacion = Math.min(maximoPorDenominacion, existencia);
 
                 if (cantidadPorDenomiacion > 0) {

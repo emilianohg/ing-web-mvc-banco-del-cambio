@@ -1,5 +1,9 @@
 package com.emilianohg.models;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Billete {
     private int existencia;
     private int denominacion;
@@ -16,7 +20,7 @@ public class Billete {
     public Billete(int denominacion, int existencia, String fecha) {
         this.existencia = existencia;
         this.denominacion = denominacion;
-        this.fecha = fecha;
+        this.fecha = (fecha == null) ? this.getCurrentDate() : fecha;
     }
 
     public void agregarExistencia(int extra) {
@@ -42,5 +46,10 @@ public class Billete {
                 ", denominacion=" + denominacion +
                 ", fecha=" + fecha +
                 '}';
+    }
+
+    private String getCurrentDate() {
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return formatter.format(new Date());
     }
 }
